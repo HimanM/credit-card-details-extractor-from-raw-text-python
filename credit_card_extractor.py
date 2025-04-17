@@ -142,5 +142,11 @@ def extract_credit_card_info(text):
             i = j + 6  # move past block
         else:
             i += 1
+    try:
+        return results
+    except UnboundLocalError:
+        print("No credit card found")
+        return None
+        
 
-    return results
+
