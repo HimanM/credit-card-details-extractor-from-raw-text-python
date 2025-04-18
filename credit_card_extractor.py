@@ -133,7 +133,13 @@ def extract_credit_card_info(text):
                 'bin_data': check_bin_number(card_number)
             })
 
-            result_JSON = json.dumps(results_list, indent=4)
+            for result in results_list:
+                if isinstance(result.get("bin_data"), list) and len(result["bin_data"]) == 1:
+                    result["bin_data"] = result["bin_data"][0]
+
+            # Dump just the first item without list brackets
+            result_JSON = json.dumps(results_list[0], indent=4)
+
             results = {
                  "list": results_list,
                  "json": result_JSON

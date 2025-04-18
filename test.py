@@ -1,13 +1,12 @@
 from credit_card_extractor import extract_credit_card_info
 
-raw_text = '''4491455555555555|12|26|123'''
+raw_text = '''5355555555555555|12|26|123'''
 
 
 # Print the JSON representation of the extracted credit card information
 print(extract_credit_card_info(raw_text).get('json'))
 
 # Result:
-# [
 #     {
 #         "card_number": "4491455555555555",
 #         "card_type": "Visa",
@@ -15,7 +14,7 @@ print(extract_credit_card_info(raw_text).get('json'))
 #         "expiration_year": 2026,
 #         "expiration_month": 12,
 #         "cvv": "123",
-#         "bin_data": [
+#         "bin_data":
 #             {
 #                 "BIN": "44914555",
 #                 "Scheme": "None",
@@ -26,9 +25,8 @@ print(extract_credit_card_info(raw_text).get('json'))
 #                 "Country Emoji": "None",
 #                 "Bank": "None"
 #             }
-#         ]
 #     }
-# ]
+
 
 
 
