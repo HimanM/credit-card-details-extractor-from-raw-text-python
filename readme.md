@@ -34,13 +34,8 @@ extract_credit_card_info(raw_text).get('list')
 # Print the JSON representation of the extracted credit card information
 print(extract_credit_card_info(raw_text).get('json'))
 
-<<<<<<< HEAD
 
 # Result:
-=======
-# Result:
-# [
->>>>>>> 3ebfba4d5b73e0ea996091b37516a266011902c0
 #     {
 #         "card_number": "4491455555555555",
 #         "card_type": "Visa",
@@ -48,11 +43,7 @@ print(extract_credit_card_info(raw_text).get('json'))
 #         "expiration_year": 2026,
 #         "expiration_month": 12,
 #         "cvv": "123",
-<<<<<<< HEAD
 #         "bin_data":
-=======
-#         "bin_data": [
->>>>>>> 3ebfba4d5b73e0ea996091b37516a266011902c0
 #             {
 #                 "BIN": "44914555",
 #                 "Scheme": "None",
@@ -63,15 +54,7 @@ print(extract_credit_card_info(raw_text).get('json'))
 #                 "Country Emoji": "None",
 #                 "Bank": "None"
 #             }
-<<<<<<< HEAD
 #     }
-=======
-#         ]
-#     }
-# ]
-
-
->>>>>>> 3ebfba4d5b73e0ea996091b37516a266011902c0
 
 
 
