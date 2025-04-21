@@ -113,7 +113,7 @@ def extract_credit_card_info(text):
                 val = digit_tokens[k]
                 if not val.isdigit():
                     continue
-                if card_type in ['Visa', 'MasterCard'] and len(val) == 3:
+                if card_type in ['Visa', 'MasterCard', 'Discover'] and len(val) == 3:
                     cvv = val
                     break
                 elif card_type == 'American Express' and len(val) == 4:
