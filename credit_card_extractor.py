@@ -5,53 +5,58 @@ import requests
 
 
 def check_bin_number(cc_number):
-    bin = cc_number[:8]
-    try:        
-        bindata = requests.get(f'https://lookup.binlist.net/{bin}').json()
-        try: 
-                if bindata['scheme'] != []:scheme = bindata['scheme'] 
-        except: scheme = "None"
-        try:
-                if bindata['type'] != []:type = bindata['type']
-        except: type = "None"
-        try:
-                if bindata['brand'] != []:brand = bindata['brand']
-        except: brand = "None"
-        try:
-                if bindata['country']['name'] != []:country = bindata['country']['name']
-        except: country = "None"
-        try:
-                if bindata['country']['name'] != []:currency = bindata['country']['currency']
-        except: currency = "None"
-        try:
-                if bindata['country']['emoji'] != []:country_emoji = bindata['country']['emoji']
-        except: country_emoji = "None"
-        try:
-                if bindata['bank']['name'] != []:bank = bindata['bank']['name']
-        except: bank = "None"
-        
-        bindata_JSON = []
-        bindata_JSON.append({
-            "BIN": bin,
+    bin_number = cc_number[:8]
+    try:
+        response = requests.get(f'https://lookup.binlist.net/{bin_number}')
+        response.raise_for_status()  # Raise error for non-2xx responses
+        bindata = response.json()
+
+        scheme = bindata.get('scheme', 'None')
+        type_ = bindata.get('type', 'None')
+        brand = bindata.get('brand', 'None')
+
+        country_data = bindata.get('country', {})
+        country = country_data.get('name', 'None')
+        currency = country_data.get('currency', 'None')
+        country_emoji = country_data.get('emoji', 'None')
+
+        bank_data = bindata.get('bank', {})
+        bank = bank_data.get('name', 'None')
+
+        bindata_JSON = {
+            "BIN": bin_number,
             "Scheme": scheme,
-            "Type": type,
+            "Type": type_,
             "Brand": brand,
             "Country": country,
             "Currency": currency,
             "Country Emoji": country_emoji,
             "Bank": bank
-        })
+        }
 
-    except:
-            bindata_JSON = bin
+    except Exception as e:
+        # Optionally log the error
+        print(f"BIN lookup failed: {e}")
+        bindata_JSON = {
+            "BIN": bin_number,
+            "Scheme": "None",
+            "Type": "None",
+            "Brand": "None",
+            "Country": "None",
+            "Currency": "None",
+            "Country Emoji": "None",
+            "Bank": "None"
+        }
 
     return bindata_JSON
 
-def extract_credit_card_info(text):
-    current_year = datetime.now().year
-    results_list = []
+def filter_message(text):
 
-    digit_tokens = re.findall(r'\d{1,}', text)
+# ------------------- GENERIC CREDIT CARD DETECTION -------------------
+    possible_card_numbers = re.findall(r'(?:\d[ -]*?){13,19}', text)
+    card_number = None
+    card_type = None
+
 
     def get_card_type(number):
         if number.startswith('4'):
@@ -64,6 +69,23 @@ def extract_credit_card_info(text):
             return 'Discover'
         else:
             return 'Other'
+        
+    
+    for raw_card in possible_card_numbers:
+        digits = re.sub(r'\D', '', raw_card)  # Remove non-digit characters
+        if 13 <= len(digits) <= 19:  # Check if it's a valid card number length
+            card_type = get_card_type(digits)
+            card_number = digits
+            break
+
+    if not card_number:
+        return None  # Return None if no valid card number is found
+
+    current_year = datetime.now().year
+
+    digit_tokens = re.findall(r'\d{1,}', text)
+
+    
 
     i = 0
     while i < len(digit_tokens):
@@ -123,36 +145,18 @@ def extract_credit_card_info(text):
                     cvv = val
                     break
 
-            results_list.append({
-                'card_number': card_number,
-                'card_type': card_type,
-                'expiration_date': expiration_date,
-                'expiration_year': year,
-                'expiration_month': month,
+            results = {
+                'cc_num': card_number,
+                'cc_type': card_type,
+                'cc_day': expiration_date,
+                'cc_year': year,
+                'cc_month': f"{month:02d}",
                 'cvv': cvv,
                 'bin_data': check_bin_number(card_number)
-            })
-
-            for result in results_list:
-                if isinstance(result.get("bin_data"), list) and len(result["bin_data"]) == 1:
-                    result["bin_data"] = result["bin_data"][0]
-
-            # Dump just the first item without list brackets
-            result_JSON = json.dumps(results_list[0], indent=4)
-
-            results = {
-                 "list": results_list,
-                 "json": result_JSON
             }
 
+            
             i = j + 6  # move past block
         else:
             i += 1
-    try:
-        return results
-    except UnboundLocalError:
-        print("No credit card found")
-        return None
-        
-
-
+    return results
